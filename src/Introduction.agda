@@ -10,21 +10,21 @@ data Bool : Set where
 -- data Bool : Set where
 --   true false : Bool
 
--- basic operations on boolean
+-- Basic operations on boolean
 
--- negation
+-- Negation
 
 not : Bool → Bool
 not true = false
 not false = true
 
--- disjunction
+-- Disjunction
 
 _or_ : Bool → Bool → Bool       -- mixfix syntax
 true  or _  = true
 false or b₂ = b₂
 
--- conjunction
+-- Conjunction
 
 _and_ : Bool → Bool → Bool
 true  and b₂ = b₂
@@ -36,11 +36,11 @@ data ℕ : Set where
   zero : ℕ
   succ : ℕ → ℕ
 
--- we bind the built-in type
+-- We bind the built-in type.
 
 {-# BUILTIN NATURAL ℕ #-}       
 
--- fixity as in Haskell
+-- Fixity as in Haskell
 
 infixl 7 _*_
 infixl 6 _+_
@@ -57,7 +57,7 @@ pred : ℕ → ℕ
 pred zero = zero
 pred (succ n) = n
 
--- product and sum
+-- Product and sum
 
 data _×_ (A B : Set) : Set where
   _,_ : A → B → A × B
@@ -72,22 +72,25 @@ data List (A : Set) : Set where
   []  : List A
   _∷_ : A → List A → List A
 
--- hd : {A : Set} → List A → A
--- hd [] = {!!}                    -- ????
--- hd (x ∷ l) = x
+-- lhd : {A : Set} → List A → A
+-- lhd [] = {!!}                    -- ????
+-- lhd (x ∷ l) = x
 
 length : ∀{A} → List A → ℕ
 length [] = zero
 length (x ∷ xs) = succ (length xs)
 
--- Vectors are lists indexed by their length
+-- Vectors are lists indexed by their length.
 
 data Vec (A : Set) : ℕ → Set where
   []  : Vec A zero
   _∷_ : {n : ℕ} → A → Vec A n → Vec A (succ n)
 
-vhd : {A : Set}{n : ℕ} → Vec A (succ n) → A
-vhd (x ∷ v) = x
+head : {A : Set}{n : ℕ} → Vec A (succ n) → A
+head (x ∷ v) = x
+
+tail : {A : Set}{n : ℕ} → Vec A (succ n) → Vec A n
+tail (x ∷ xs) = xs
 
 append : ∀{m n A} → Vec A m → Vec A n → Vec A (m + n)
 append [] v₂ = v₂

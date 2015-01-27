@@ -1,23 +1,59 @@
 module Logic where
 
-open import Introduction using (ℕ ; succ ; zero; pred)
+open import Introduction using (ℕ ; succ ; zero)
 
--- PREDICATE LOGIC
+-- PROPOSITIONAL LOGIC
 
--- conjunction (same as product !)
+-- Conjunction (same definition as product !)
+
+{-
+
+  Γ ⊢ A  Γ ⊢ B
+ ────────────── ∧ᵢ
+   Γ ⊢ A ∧ B
+
+-}
 
 data _∧_ (A B : Set) : Set where
   _&_ : A → B → A ∧ B
 
 -- ∧-elimination
 
+{-
+
+   Γ ⊢ A ∧ B
+ ────────────── ∧ₑ₁
+     Γ ⊢ A
+
+-}
+
 fst : {A B : Set} → A ∧ B → A
 fst (a & b) = a
+
+{-
+
+   Γ ⊢ A ∧ B
+ ────────────── ∧ₑ₂
+     Γ ⊢ B
+
+-}
 
 snd : {A B : Set} → A ∧ B → B
 snd (a & b) = b
 
--- disjunction (same as sum !)
+-- Disjunction (same definition as sum !)
+
+{-
+
+     Γ ⊢ A
+ ────────────── ∨ᵢ₁
+   Γ ⊢ A ∨ B
+
+     Γ ⊢ B
+ ────────────── ∨ᵢ₂
+   Γ ⊢ A ∨ B
+
+-}
 
 data _∨_ (A B : Set) : Set where
   inl : A → A ∨ B
@@ -25,97 +61,205 @@ data _∨_ (A B : Set) : Set where
 
 -- ∨-elimination
 
+{-
+
+  Γ ⊢ A ∨ B   Γ,A ⊢ C  Γ,B ⊢ C
+ ─────────────────────────────── ∨ₑ
+               Γ ⊢ C
+
+-}
+
 case : {A B C : Set} → A ∨ B → (A → C) → (B → C) → C
 case (inl a) f g = f a
 case (inr b) f g = g b
 
--- true and false
+-- True and false
 
 data ⊤ : Set where
   ⟨⟩ : ⊤
 
 data ⊥ : Set where          -- False has not habitant
 
--- ⊥-elim (absurd pattern () is telling us ⊥ implies anything)
+-- ⊥-elim (⊥ implies anything)
+
+{-
+
+     Γ ⊢ ⊥
+ ────────────── ⊥ₑ
+     Γ ⊢ A
+
+-}
 
 nocase : {A : Set} → ⊥ → A
-nocase ()
+nocase ()                       -- we call it the 'absurd pattern'
 
--- negation
+-- Negation
+
+---- ¬ A ≡ A ⇒ ⊥
 
 ¬ : Set → Set
 ¬ A = A → ⊥
 
--- implication (we need a constructor in Agda)
+¬-elim : ∀{A} → ¬ A → A → ⊥
+¬-elim a b = a b
+
+-- Implication
 
 data _⇒_ (A B : Set) : Set where
   fun : (A → B) → A ⇒ B
 
--- equivalence
+{-
+
+  Γ,A ⊢ B   Γ ⊢ A
+ ───────────────── ⇒ₑ
+       Γ ⊢ B
+
+-}
+
+---- sometimes named application ;)
+⇒-elim : ∀{A B} → A ⇒ B → (a : A) → B 
+⇒-elim (fun f) a = f a
+
+-- Equivalence
+
+{-
+
+  Γ,A ⊢ B   Γ,B ⊢ A
+ ─────────────────── ⇔ᵢ
+       Γ ⊢ A ⇔ B
+
+-}
 
 _⇔_ : Set → Set → Set
 A ⇔ B = (A ⇒ B) ∧ (B ⇒ A)
-  
--- application
 
-apply : {A B : Set} → A ⇒ B → A → B
-apply (fun f) a = f a
+-- ⇔-elimination
 
----- PROPOSITIONAL LOGIC
+{-
 
--- universal
+  Γ ⊢ A   Γ ⊢ A ⇔ B
+ ─────────────────── ⇔ₑ₁
+       Γ ⊢ B
 
-data Forall (A : Set) (B : A → Set) : Set where -- ∀ = \all
-  ∀' : ((a : A) → B a) → Forall A B 
+-}
+
+⇔-elim₁ : ∀{A B} → A → A ⇔ B → B
+⇔-elim₁ a (fun a→b & b⇒a) = a→b a
+
+{-
+
+  Γ ⊢ B   Γ ⊢ A ⇔ B
+ ─────────────────── ⇔ₑ₂
+       Γ ⊢ A
+
+-}
+
+⇔-elim₂ : ∀{A B} → B → A ⇔ B → A
+⇔-elim₂ b (a⇒b & fun b→a) = b→a b
+
+
+---- PREDICATE LOGIC
+
+-- Universal
+
+data Forall (A : Set) (β : A → Set) : Set where
+  ∀' : ((α : A) → β α) → Forall A β
+
+{-
+
+    φ (β / α)
+  ───────────── ∀ᵢ
+       ∀α φ  
+
+-}
+
+∀-intro : {A : Set} {β : A → Set} → ((α : A) → β α) → ∀ α → β α
+∀-intro β = β
 
 -- ∀-elim
+
+{-
+
+      ∀α φ
+  ───────────── ∀ₑ
+    φ (β / α)   
+
+-}
 
 ∀-elim : {A : Set}{B : A → Set} → Forall A B → (a : A) → B a
 ∀-elim (∀' f) a = f a
 
--- existential
+-- Existential
+
+{-
+
+  ∃α φ  φ(β/α) ⊢ ψ 
+ ─────────────────── ∃ᵢ
+                     
+
+-}
 
 data ∃ (A : Set)(B : A → Set) : Set where
   [_,_] : (a : A) → B a → ∃ A B
 
+-- Asking for the witness α and the proof that B holds for the
+-- witness α.
+
+witness : {A : Set} {B : A → Set} → ∃ A B → A
+witness [ a , b ] = a
+
+proof : {A : Set} {B : A → Set} → (c : ∃ A B) → B (witness c)
+proof [ a , b ] = b
+
 -- ∃-elim
+
+{-
+
+  ∃α φ  φ(β/α) ⊢ ψ 
+ ─────────────────── ∃ₑ
+       ψ
+
+-}
 
 ∃-elim : {A C : Set}{B : A → Set} → ∃ A B → ((a : A) → B a → C) → C
 ∃-elim [ a , b ] f = f a b
 
 ---- EQUATIONAL REASONING
 
--- reflexivity
+-- Reflexivity
 
 infix 4 _≡_
 
 data _≡_ {A : Set} (a : A) : A → Set where
   refl : a ≡ a
 
--- and we can easily define _≢_
+-- Sometimes named subst
+≡-elim : ∀{A}{P : A → Set}{a₁ a₂ : A} → a₁ ≡ a₂ → P a₁ → P a₂
+≡-elim refl pa₂ = pa₂
+
+-- and we can easily define _≢_ with ¬_
 
 _≢_ : {A : Set} → A → A → Set
 a ≢ b = ¬ (a ≡ b)
 
--- symmetry
+-- Symmetry
 
 sym : ∀{A}{a b : A} → a ≡ b → b ≡ a
 sym refl = refl
 
--- transitivity
+-- Transitivity
 
 trans : ∀{A}{a b c : A} → a ≡ b → b ≡ c → a ≡ c
 trans refl refl = refl
 
--- congruence
+-- Congruence
 
 cong : {A B : Set} {m n : A} → (f : A → B) → m ≡ n → f m ≡ f n
 cong f refl = refl
 
+-- Example of equational reasoning on natural numbers.
 
--- Example of equational reasoning on natural numbers
-
--- we will need the operator of composition
+-- We will need the composition operator.
 
 _∘_ : {A : Set} {B : A → Set} {C : {x : A} → B x → Set} →
       (∀ {x} (y : B x) → C y) → (g : (x : A) → B x) →
