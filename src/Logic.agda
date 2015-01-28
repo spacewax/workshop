@@ -199,17 +199,17 @@ data Forall (A : Set) (β : A → Set) : Set where
 
 -}
 
-data ∃ (A : Set)(B : A → Set) : Set where
-  [_,_] : (a : A) → B a → ∃ A B
+data ∃ (A : Set)(β : A → Set) : Set where
+  [_,_] : (α : A) → β α → ∃ A β
 
 -- Asking for the witness α and the proof that B holds for the
 -- witness α.
 
-witness : {A : Set} {B : A → Set} → ∃ A B → A
-witness [ a , b ] = a
+witness : {A : Set} {β : A → Set} → ∃ A β → A
+witness [ α , β/α ] = α
 
-proof : {A : Set} {B : A → Set} → (c : ∃ A B) → B (witness c)
-proof [ a , b ] = b
+proof : {A : Set} {β : A → Set} → (c : ∃ A β) → β (witness c)
+proof [ a , β/α ] = β/α
 
 -- ∃-elim
 
@@ -221,8 +221,8 @@ proof [ a , b ] = b
 
 -}
 
-∃-elim : {A C : Set}{B : A → Set} → ∃ A B → ((a : A) → B a → C) → C
-∃-elim [ a , b ] f = f a b
+∃-elim : {A C : Set}{β : A → Set} → ∃ A β → ((α : A) → β α → C) → C
+∃-elim [ α , β/α ] f = f α β/α
 
 ---- EQUATIONAL REASONING
 
