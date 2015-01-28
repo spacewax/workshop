@@ -167,7 +167,7 @@ data Forall (A : Set) (β : A → Set) : Set where
 
 {-
 
-    φ (β / α)
+    φ (β/α)
   ───────────── ∀ᵢ
        ∀α φ  
 
@@ -182,7 +182,7 @@ data Forall (A : Set) (β : A → Set) : Set where
 
       ∀α φ
   ───────────── ∀ₑ
-    φ (β / α)   
+    φ (β/α)   
 
 -}
 
@@ -193,7 +193,7 @@ data Forall (A : Set) (β : A → Set) : Set where
 
 {-
 
-     φ (β / α)
+     φ (β/α)
  ─────────────── ∃ᵢ
        ∃α φ       
 
